@@ -44,7 +44,9 @@ namespace Parte1
         public byte Enconde(string mainKey, string key1, string key2, int[] P4, int[] EP, int[] IP, int[] IP1)
         {
             string encode = "";
-            char[] key = mainKey.ToArray(), k1 = key1.ToArray(), k2 = key2.ToArray();
+            char[] key = mainKey.ToArray();
+            char[] k1 = key1.ToArray();
+            char[] k2 = key2.ToArray();
             char[] pKey = new char[key.Length];
             char[] p4 = new char[P4.Length];
             char[] L, R, l, r, s;

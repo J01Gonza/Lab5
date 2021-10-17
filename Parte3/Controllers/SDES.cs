@@ -7,6 +7,10 @@ using Parte1;
 using Microsoft.AspNetCore.Http;
 using System.IO;
 using System.Text;
+using System.Data;
+using System.ComponentModel;
+using System.Data.OleDb;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Parte3.Controllers
 {
@@ -15,9 +19,15 @@ namespace Parte3.Controllers
     [Route("api")]
     public class SDESController : Controller
     {
-        [Route("cipher")]
+        public static IWebHostEnvironment Environment;
+        public SDESController(IWebHostEnvironment _environment)
+        {
+            Environment = _environment;
+        }
+
+        [Route("cipher/{name}")]
         [HttpPost]
-        public ActionResult Cipher(string key, IFormFile file, [FromRoute] string name)
+        public ActionResult Cipher([FromRoute] string name, string key, IFormFile file)
         {
             try
             {
@@ -28,27 +38,33 @@ namespace Parte3.Controllers
                     const int MAX_BUFFER = 1000;
                     byte[] buffer = new byte[MAX_BUFFER];
                     int bytesRead;
-                    var fileBytes = (dynamic)null;
-                    using (var ms = new MemoryStream())
-                    {
-                        file.CopyTo(ms);
-                        fileBytes = ms.ToArray();
-                    }
                     //PERMUTACIONES
                     StreamReader lector = new StreamReader("Permutaciones.txt");
-                    int[] p8 = new int[10];
-                    new Permutaciones().llenarpermutaciones(p8, lector.ReadLine());
                     int[] p10 = new int[10];
                     new Permutaciones().llenarpermutaciones(p10, lector.ReadLine());
-                    int[] p4 = new int[10];
+                    int[] p8 = new int[8];
+                    new Permutaciones().llenarpermutaciones(p8, lector.ReadLine());
+                    int[] p4 = new int[4];
                     new Permutaciones().llenarpermutaciones(p4, lector.ReadLine());
-                    int[] ep = new int[10];
+                    int[] ep = new int[8];
                     new Permutaciones().llenarpermutaciones(ep, lector.ReadLine());
-                    int[] ip = new int[10];
+                    int[] ip = new int[8];
                     new Permutaciones().llenarpermutaciones(ip, lector.ReadLine());
-                    int[] ip1 = new int[10];
+                    int[] ip1 = new int[8];
                     new Permutaciones().llenarpermutaciones(ip1, lector.ReadLine());
-                    using (FileStream fs = File(fileBytes, file.ContentType))
+                    //ARCHIVO WEB A UPLOADS
+                    string path = Path.Combine(Environment.WebRootPath, "Uploads");
+                    if (!Directory.Exists(path))
+                    {
+                        Directory.CreateDirectory(path);
+                    }
+                    string filePath = Path.Combine(path, file.FileName);
+                    using (FileStream stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        file.CopyTo(stream);
+                    }
+                    //LECTURA CON BUFFER
+                    using (FileStream fs = System.IO.File.Open(filePath, FileMode.Open, FileAccess.Read))
                     using (BufferedStream bs = new BufferedStream(fs))
                     {
                         while ((bytesRead = bs.Read(buffer, 0, MAX_BUFFER)) != 0) //leyendo 1000 bytes a la vez
@@ -56,19 +72,23 @@ namespace Parte3.Controllers
                             final.Clear();
                             foreach (var b in buffer)
                             {
-                                SDES sdes = new ImplementationClass();
-                                string k = Convert.ToString(keynum, 2).PadLeft(10, '0');
-                                var keys = sdes.generateKey(k, p10, p8);
-                                final.Add(sdes.Enconde(k, keys.key1, keys.key2, p4, ep, ip, ip1));
+                                if(b != 0)
+                                {
+                                    SDES sdes = new ImplementationClass();
+                                    string k = Convert.ToString(keynum, 2).PadLeft(10, '0');
+                                    var keys = sdes.generateKey(k, p10, p8);
+                                    final.Add(sdes.Enconde(Convert.ToString(b, 2).PadLeft(8, '0'), keys.key1, keys.key2, p4, ep, ip, ip1));
+                                }
                             }
-                            string path = Environment.CurrentDirectory + "\\" + name + ".txt"; //extension
-                            using (var stream = new FileStream(path, FileMode.Append))
+                            string pathcipher = System.Environment.CurrentDirectory + "\\" + name + ".sdes"; //extension
+                            using (FileStream stream = new FileStream(pathcipher, FileMode.Create)) 
                             {
-                                stream.Write(final.ToArray(), 0, final.Count);
+                                FileContentResult x = File(final.ToArray(), "aplication/text", name);
+                                
                             }
                         }
                     }
-                    return Ok("Archivo cifrado en: " + Environment.CurrentDirectory);
+                    return Ok("Archivo cifrado en: " + System.Environment.CurrentDirectory);
                 }
                 else
                 {
@@ -84,7 +104,7 @@ namespace Parte3.Controllers
 
         [Route("decipher")]
         [HttpPost]
-        public ActionResult Decipher(string key, IFormFile file, [FromRoute] string name)
+        public ActionResult Decipher(string key, IFormFile file)
         {
             try
             {
@@ -95,27 +115,33 @@ namespace Parte3.Controllers
                     const int MAX_BUFFER = 1000;
                     byte[] buffer = new byte[MAX_BUFFER];
                     int bytesRead;
-                    var fileBytes = (dynamic)null;
-                    using (var ms = new MemoryStream())
-                    {
-                        file.CopyTo(ms);
-                        fileBytes = ms.ToArray();
-                    }
                     //PERMUTACIONES
                     StreamReader lector = new StreamReader("Permutaciones.txt");
-                    int[] p8 = new int[10];
-                    new Permutaciones().llenarpermutaciones(p8, lector.ReadLine());
                     int[] p10 = new int[10];
                     new Permutaciones().llenarpermutaciones(p10, lector.ReadLine());
-                    int[] p4 = new int[10];
+                    int[] p8 = new int[8];
+                    new Permutaciones().llenarpermutaciones(p8, lector.ReadLine());
+                    int[] p4 = new int[4];
                     new Permutaciones().llenarpermutaciones(p4, lector.ReadLine());
-                    int[] ep = new int[10];
+                    int[] ep = new int[8];
                     new Permutaciones().llenarpermutaciones(ep, lector.ReadLine());
-                    int[] ip = new int[10];
+                    int[] ip = new int[8];
                     new Permutaciones().llenarpermutaciones(ip, lector.ReadLine());
-                    int[] ip1 = new int[10];
+                    int[] ip1 = new int[8];
                     new Permutaciones().llenarpermutaciones(ip1, lector.ReadLine());
-                    using (FileStream fs = File(fileBytes, file.ContentType))
+                    //ARCHIVO WEB A UPLOADS
+                    string path = Path.Combine(Environment.WebRootPath, "Uploads");
+                    if (!Directory.Exists(path))
+                    {
+                        Directory.CreateDirectory(path);
+                    }
+                    string filePath = Path.Combine(path, file.FileName);
+                    using (FileStream stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        file.CopyTo(stream);
+                    }
+                    //LECTURA CON BUFFER
+                    using (FileStream fs = System.IO.File.Open(filePath, FileMode.Open, FileAccess.Read))
                     using (BufferedStream bs = new BufferedStream(fs))
                     {
                         while ((bytesRead = bs.Read(buffer, 0, MAX_BUFFER)) != 0) //leyendo 1000 bytes a la vez
@@ -123,19 +149,22 @@ namespace Parte3.Controllers
                             final.Clear();
                             foreach (var b in buffer)
                             {
-                                SDES sdes = new ImplementationClass();
-                                string k = Convert.ToString(keynum, 2).PadLeft(10, '0');
-                                var keys = sdes.generateKey(k, p10, p8);
-                                final.Add(sdes.Enconde(k, keys.key2, keys.key1, p4, ep, ip, ip1));
+                                if (b != 0)
+                                {
+                                    SDES sdes = new ImplementationClass();
+                                    string k = Convert.ToString(keynum, 2).PadLeft(10, '0');
+                                    var keys = sdes.generateKey(k, p10, p8);
+                                    final.Add(sdes.Enconde(Convert.ToString(b, 2).PadLeft(8, '0'), keys.key2, keys.key1, p4, ep, ip, ip1));
+                                }
                             }
-                            string path = Environment.CurrentDirectory + "\\" + name + ".txt"; //extension
-                            using (var stream = new FileStream(path, FileMode.Append))
+                            string pathcipher = System.Environment.CurrentDirectory + "\\prueba.txt"; //extension
+                            using (var stream = new FileStream(pathcipher, FileMode.Append))
                             {
                                 stream.Write(final.ToArray(), 0, final.Count);
                             }
                         }
                     }
-                    return Ok("Archivo cifrado en: " + Environment.CurrentDirectory);
+                    return Ok("Archivo cifrado en: " + System.Environment.CurrentDirectory);
                 }
                 else
                 {
