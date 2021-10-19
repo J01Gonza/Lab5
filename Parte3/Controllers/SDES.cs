@@ -27,7 +27,7 @@ namespace Parte3.Controllers
 
         [Route("cipher/{name}")]
         [HttpPost]
-        public ActionResult Cipher([FromRoute] string name, string key, IFormFile file)
+        public  ActionResult Cipher([FromRoute] string name, string key, IFormFile file)
         {
             try
             {
@@ -63,31 +63,21 @@ namespace Parte3.Controllers
                     {
                         file.CopyTo(stream);
                     }
-                    //LECTURA CON BUFFER
-                    using (FileStream fs = System.IO.File.Open(filePath, FileMode.Open, FileAccess.Read))
-                    using (BufferedStream bs = new BufferedStream(fs))
+                    //LECTURA SIN BUFFER
+                    byte[] x = System.IO.File.ReadAllBytes(filePath);
+                    foreach (byte b in x)
                     {
-                        while ((bytesRead = bs.Read(buffer, 0, MAX_BUFFER)) != 0) //leyendo 1000 bytes a la vez
+                        if (b != 0)
                         {
-                            final.Clear();
-                            foreach (var b in buffer)
-                            {
-                                if(b != 0)
-                                {
-                                    SDES sdes = new ImplementationClass();
-                                    string k = Convert.ToString(keynum, 2).PadLeft(10, '0');
-                                    var keys = sdes.generateKey(k, p10, p8);
-                                    final.Add(sdes.Enconde(Convert.ToString(b, 2).PadLeft(8, '0'), keys.key1, keys.key2, p4, ep, ip, ip1));
-                                }
-                            }
-                            string pathcipher = System.Environment.CurrentDirectory + "\\" + name + ".sdes"; //extension
-                            using (FileStream stream = new FileStream(pathcipher, FileMode.Create)) 
-                            {
-                                FileContentResult x = File(final.ToArray(), "aplication/text", name);
-                                
-                            }
+                            SDES sdes = new ImplementationClass();
+                            string k = Convert.ToString(keynum, 2).PadLeft(10, '0');
+                            var keys = sdes.generateKey(k, p10, p8);
+                            final.Add(sdes.Enconde(Convert.ToString(b, 2).PadLeft(8, '0'), keys.key1, keys.key2, p4, ep, ip, ip1));
                         }
                     }
+                    //ARREGLAR NOMBRE
+                    string pathcipher = System.Environment.CurrentDirectory + "\\prueba.txt"; //extension
+                    System.IO.File.WriteAllBytes(file.FileName.Substring(0, file.FileName.Length - 4) + ".sdes", final.ToArray());
                     return Ok("Archivo cifrado en: " + System.Environment.CurrentDirectory);
                 }
                 else
@@ -140,30 +130,21 @@ namespace Parte3.Controllers
                     {
                         file.CopyTo(stream);
                     }
-                    //LECTURA CON BUFFER
-                    using (FileStream fs = System.IO.File.Open(filePath, FileMode.Open, FileAccess.Read))
-                    using (BufferedStream bs = new BufferedStream(fs))
+                    //LECTURA SIN BUFFER
+                    byte[] x = System.IO.File.ReadAllBytes(filePath);
+                    foreach(byte b in x)
                     {
-                        while ((bytesRead = bs.Read(buffer, 0, MAX_BUFFER)) != 0) //leyendo 1000 bytes a la vez
+                        if (b != 0)
                         {
-                            final.Clear();
-                            foreach (var b in buffer)
-                            {
-                                if (b != 0)
-                                {
-                                    SDES sdes = new ImplementationClass();
-                                    string k = Convert.ToString(keynum, 2).PadLeft(10, '0');
-                                    var keys = sdes.generateKey(k, p10, p8);
-                                    final.Add(sdes.Enconde(Convert.ToString(b, 2).PadLeft(8, '0'), keys.key2, keys.key1, p4, ep, ip, ip1));
-                                }
-                            }
-                            string pathcipher = System.Environment.CurrentDirectory + "\\prueba.txt"; //extension
-                            using (var stream = new FileStream(pathcipher, FileMode.Append))
-                            {
-                                stream.Write(final.ToArray(), 0, final.Count);
-                            }
+                            SDES sdes = new ImplementationClass();
+                            string k = Convert.ToString(keynum, 2).PadLeft(10, '0');
+                            var keys = sdes.generateKey(k, p10, p8);
+                            final.Add(sdes.Enconde(Convert.ToString(b, 2).PadLeft(8, '0'), keys.key2, keys.key1, p4, ep, ip, ip1));
                         }
                     }
+                    //ARREGLAR NOMBRE
+                    string pathcipher = System.Environment.CurrentDirectory + "\\prueba.txt"; //extension
+                    System.IO.File.WriteAllBytes(pathcipher, final.ToArray());
                     return Ok("Archivo cifrado en: " + System.Environment.CurrentDirectory);
                 }
                 else
