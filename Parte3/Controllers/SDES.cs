@@ -35,9 +35,6 @@ namespace Parte3.Controllers
                 if (file.Length > 0 && keynum < 1024)
                 {
                     List<byte> final = new List<byte>();
-                    const int MAX_BUFFER = 1000;
-                    byte[] buffer = new byte[MAX_BUFFER];
-                    int bytesRead;
                     //PERMUTACIONES
                     StreamReader lector = new StreamReader("Permutaciones.txt");
                     int[] p10 = new int[10];
@@ -75,9 +72,8 @@ namespace Parte3.Controllers
                             final.Add(sdes.Enconde(Convert.ToString(b, 2).PadLeft(8, '0'), keys.key1, keys.key2, p4, ep, ip, ip1));
                         }
                     }
-                    //ARREGLAR NOMBRE
-                    string pathcipher = System.Environment.CurrentDirectory + "\\prueba.txt"; //extension
-                    System.IO.File.WriteAllBytes(file.FileName.Substring(0, file.FileName.Length - 4) + ".sdes", final.ToArray());
+                    //ESCRITURA DE ARCHIVO
+                    System.IO.File.WriteAllBytes(name+ ".sdes", final.ToArray());
                     return Ok("Archivo cifrado en: " + System.Environment.CurrentDirectory);
                 }
                 else
@@ -101,10 +97,8 @@ namespace Parte3.Controllers
                 int keynum = Convert.ToInt32(key);
                 if (file.Length > 0 && keynum < 1024)
                 {
+                    string name = "";
                     List<byte> final = new List<byte>();
-                    const int MAX_BUFFER = 1000;
-                    byte[] buffer = new byte[MAX_BUFFER];
-                    int bytesRead;
                     //PERMUTACIONES
                     StreamReader lector = new StreamReader("Permutaciones.txt");
                     int[] p10 = new int[10];
@@ -143,7 +137,8 @@ namespace Parte3.Controllers
                         }
                     }
                     //ARREGLAR NOMBRE
-                    string pathcipher = System.Environment.CurrentDirectory + "\\prueba.txt"; //extension
+                    int found = file.FileName.IndexOf(".sdes");
+                    string pathcipher = System.Environment.CurrentDirectory +"\\"+ file.FileName.Substring(0, found) + "_Descifrado" + ".txt"; //extension
                     System.IO.File.WriteAllBytes(pathcipher, final.ToArray());
                     return Ok("Archivo cifrado en: " + System.Environment.CurrentDirectory);
                 }
