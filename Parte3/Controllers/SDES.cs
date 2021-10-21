@@ -32,7 +32,7 @@ namespace Parte3.Controllers
             try
             {
                 int keynum = Convert.ToInt32(key);
-                if (file.Length > 0 && keynum < 1024)
+                if (file.Length >= 0 && keynum < 1024)
                 {
                     List<byte> final = new List<byte>();
                     //PERMUTACIONES
@@ -95,9 +95,8 @@ namespace Parte3.Controllers
             try
             {
                 int keynum = Convert.ToInt32(key);
-                if (file.Length > 0 && keynum < 1024)
+                if (file.Length >= 0 && keynum < 1024)
                 {
-                    string name = "";
                     List<byte> final = new List<byte>();
                     //PERMUTACIONES
                     StreamReader lector = new StreamReader("Permutaciones.txt");
