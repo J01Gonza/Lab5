@@ -27,16 +27,16 @@ namespace Parte3.Controllers
 
         [Route("cipher/{name}")]
         [HttpPost]
-        public  ActionResult Cipher([FromRoute] string name, string key, IFormFile file)
+        public ActionResult Cipher([FromRoute] string name, string key, IFormFile file)
         {
             try
             {
                 int keynum = Convert.ToInt32(key);
-                if (file.Length >= 0 && keynum < 1024)
+                if (file.Length > 0 && keynum < 1024)
                 {
                     List<byte> final = new List<byte>();
                     //PERMUTACIONES
-                    StreamReader lector = new StreamReader("Permutaciones.txt");
+                    StreamReader lector = new StreamReader("Permutations.txt");
                     int[] p10 = new int[10];
                     new Permutaciones().llenarpermutaciones(p10, lector.ReadLine());
                     int[] p8 = new int[8];
@@ -50,18 +50,16 @@ namespace Parte3.Controllers
                     int[] ip1 = new int[8];
                     new Permutaciones().llenarpermutaciones(ip1, lector.ReadLine());
                     //ARCHIVO WEB A UPLOADS
-                    string path = Path.Combine(Environment.WebRootPath, "Uploads");
-                    if (!Directory.Exists(path))
+                    if (!Directory.Exists(Environment.WebRootPath + "\\Upload\\"))
                     {
-                        Directory.CreateDirectory(path);
+                        Directory.CreateDirectory(Environment.WebRootPath + "\\Upload\\");
                     }
-                    string filePath = Path.Combine(path, file.FileName);
-                    using (FileStream stream = new FileStream(filePath, FileMode.Create))
+                    using (FileStream stream = new FileStream(Environment.WebRootPath + "\\Upload\\" + file.FileName, FileMode.Create))
                     {
                         file.CopyTo(stream);
                     }
                     //LECTURA SIN BUFFER
-                    byte[] x = System.IO.File.ReadAllBytes(filePath);
+                    byte[] x = System.IO.File.ReadAllBytes(Environment.WebRootPath + "\\Upload\\" + file.FileName);
                     foreach (byte b in x)
                     {
                         if (b != 0)
@@ -95,11 +93,11 @@ namespace Parte3.Controllers
             try
             {
                 int keynum = Convert.ToInt32(key);
-                if (file.Length >= 0 && keynum < 1024)
+                if (file.Length > 0 && keynum < 1024)
                 {
                     List<byte> final = new List<byte>();
                     //PERMUTACIONES
-                    StreamReader lector = new StreamReader("Permutaciones.txt");
+                    StreamReader lector = new StreamReader("Permutations.txt");
                     int[] p10 = new int[10];
                     new Permutaciones().llenarpermutaciones(p10, lector.ReadLine());
                     int[] p8 = new int[8];
@@ -113,19 +111,17 @@ namespace Parte3.Controllers
                     int[] ip1 = new int[8];
                     new Permutaciones().llenarpermutaciones(ip1, lector.ReadLine());
                     //ARCHIVO WEB A UPLOADS
-                    string path = Path.Combine(Environment.WebRootPath, "Uploads");
-                    if (!Directory.Exists(path))
+                    if (!Directory.Exists(Environment.WebRootPath + "\\Upload\\"))
                     {
-                        Directory.CreateDirectory(path);
+                        Directory.CreateDirectory(Environment.WebRootPath + "\\Upload\\");
                     }
-                    string filePath = Path.Combine(path, file.FileName);
-                    using (FileStream stream = new FileStream(filePath, FileMode.Create))
+                    using (FileStream stream = new FileStream(Environment.WebRootPath + "\\Upload\\" + file.FileName, FileMode.Create))
                     {
                         file.CopyTo(stream);
                     }
                     //LECTURA SIN BUFFER
-                    byte[] x = System.IO.File.ReadAllBytes(filePath);
-                    foreach(byte b in x)
+                    byte[] x = System.IO.File.ReadAllBytes(Environment.WebRootPath + "\\Upload\\" + file.FileName);
+                    foreach (byte b in x)
                     {
                         if (b != 0)
                         {
